@@ -62,4 +62,34 @@ public class EmployeeService {
       }
         return response;
     }
+
+    public EntityResponse updateEmployee(EmployeeModel employeeModel) {
+        EntityResponse response = new EntityResponse();
+        try {
+            EmployeeModel existingEmployee = employeeRepository.findById(employeeModel.getId()).orElse(null);
+            if (existingEmployee != null) {
+                // Update the fields of the existingEmployee with the new data from employeeModel
+                existingEmployee.setFName(employeeModel.getFName());
+                existingEmployee.setAge(employeeModel.getAge());
+                existingEmployee.setLName(employeeModel.getLName());
+                existingEmployee.setId(employeeModel.getId());
+                existingEmployee.setDepartment(employeeModel.getDepartment());
+                existingEmployee.setDob(employeeModel.getDob());
+
+                employeeRepository.save(existingEmployee);
+
+                response.setMessages("Employee updated successfully");
+                response.setStatusCode(HttpStatus.OK.value());
+                response.setEntity(existingEmployee);
+            } else {
+                response.setMessages("Employee not found");
+                response.setStatusCode(HttpStatus.NOT_FOUND.value());
+            }
+        } catch (Exception e) {
+            response.setMessages("Error updating employee: " + e.getMessage());
+            response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+        return response;
+    }
+
 }

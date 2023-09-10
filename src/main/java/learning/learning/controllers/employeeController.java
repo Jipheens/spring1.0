@@ -28,4 +28,8 @@ public class employeeController {
         return employeeService.addEmployee(employeeModel);
     }
 
-}
+    @PutMapping("/update")
+    public EntityResponse updateEmployee(@RequestBody EmployeeModel employeeModel){
+        return  employeeService.updateEmployee(employeeModel);
+    }
+    }
