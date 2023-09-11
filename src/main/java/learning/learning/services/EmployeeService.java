@@ -1,12 +1,14 @@
 package learning.learning.services;
 
 import learning.learning.Utilitiess.EntityResponse;
+import learning.learning.Utilitiess.UserRequestContacts;
 import learning.learning.models.EmployeeModel;
 import learning.learning.repos.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -34,7 +36,7 @@ public class EmployeeService {
     public EntityResponse getEmployees() {
         EntityResponse response=new EntityResponse();
         try {
-            Iterable<EmployeeModel> existingEmloyees= employeeRepository.findAll();
+            Iterable<EmployeeModel> existingEmloyees= employeeRepository.findByDeleteflag('N');
             response.setMessages(HttpStatus.OK.getReasonPhrase());
             response.setStatusCode(HttpStatus.OK.value());
             response.setEntity(existingEmloyees);
@@ -50,11 +52,18 @@ public class EmployeeService {
       EntityResponse response= new EntityResponse();
       try {
 
-          Optional<EmployeeModel> existingEmployee = employeeRepository.findById(id) ;
+          Iterable<EmployeeModel> existingEmployee = employeeRepository.findByDeleteflag('N');
+          if (existingEmployee!=null) {
 
-          response.setMessages(HttpStatus.OK.getReasonPhrase());
-          response.setStatusCode(HttpStatus.OK.value());
-          response.setEntity(existingEmployee);
+              response.setMessages(HttpStatus.OK.getReasonPhrase());
+              response.setStatusCode(HttpStatus.OK.value());
+              response.setEntity(existingEmployee);
+          }
+          else {
+              response.setMessages("Employee not found");
+
+          }
+
       }
       catch (Exception ex){
           response.setMessages(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
@@ -68,13 +77,6 @@ public class EmployeeService {
         try {
             EmployeeModel existingEmployee = employeeRepository.findById(employeeModel.getId()).orElse(null);
             if (existingEmployee != null) {
-                // Update the fields of the existingEmployee with the new data from employeeModel
-                existingEmployee.setFName(employeeModel.getFName());
-                existingEmployee.setAge(employeeModel.getAge());
-                existingEmployee.setLName(employeeModel.getLName());
-                existingEmployee.setId(employeeModel.getId());
-                existingEmployee.setDepartment(employeeModel.getDepartment());
-                existingEmployee.setDob(employeeModel.getDob());
 
                 employeeRepository.save(existingEmployee);
 
@@ -92,4 +94,30 @@ public class EmployeeService {
         return response;
     }
 
+    public EntityResponse<EmployeeModel> deleteEmployee(Long id) {
+        EntityResponse response=new EntityResponse();
+        try {
+            Optional<EmployeeModel> existingEmployee = employeeRepository.findById(id);
+
+            if (existingEmployee != null) {
+                EmployeeModel employeeModel = existingEmployee.get();
+
+                employeeModel.setDeletedBy(UserRequestContacts.UserRequestContext.getCurrentUser());
+                employeeModel.setDeletedFla('Y');
+                employeeModel.setDeletedTime(LocalDateTime.now());
+
+                EmployeeModel deletedEmployed = employeeRepository.save(employeeModel);
+
+                response.setMessages("Employee record Deleted successfully");
+                response.setStatusCode(HttpStatus.OK.value());
+
+            }
+
+        }
+        catch (Exception ex){
+            response.setMessages("Error Deleting record: " + ex.getMessage());
+            response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+return response;
+    }
 }

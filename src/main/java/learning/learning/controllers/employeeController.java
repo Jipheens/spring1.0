@@ -32,4 +32,9 @@ public class employeeController {
     public EntityResponse updateEmployee(@RequestBody EmployeeModel employeeModel){
         return  employeeService.updateEmployee(employeeModel);
     }
+
+    @DeleteMapping("/delete")
+    public  EntityResponse deleteEmployee(@RequestParam Long id){
+        return employeeService.deleteEmployee(id);
+    }
     }
