@@ -15,13 +15,11 @@ function Fetchdata() {
       }, []);
       
       const handleDelete = (id) => {
-        // Make a DELETE request to the API endpoint with the id as a parameter
         fetch(`http://localhost:7676/api/v1/delete?id=${id}`, {
           method: 'DELETE',
         })
           .then((response) => {
             if (response.status === 200) {
-              // If the deletion is successful, update the state to remove the deleted item
               setdata((prevData) => prevData.filter((item) => item.id !== id));
               console.log(`Item with id ${id} deleted successfully.`);
             } else {
